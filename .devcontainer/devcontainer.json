@@ -1,0 +1,17 @@
+{
+    "dockerFile": "Dockerfile.ubuntu",
+    "runArgs": ["--add-host=host.docker.internal:host-gateway"],
+    "containerUser": "ubuntu",
+    "mounts": [
+        "src=//var/run/docker.sock,dst=/var/run/docker.sock,type=bind",
+        "src=ubuntu-config,dst=/home/ubuntu/.config,type=volume"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "pjmiravalle.terraform-advanced-syntax-highlighting",
+                "esbenp.prettier-vscode"
+            ]
+        }
+    }
+}

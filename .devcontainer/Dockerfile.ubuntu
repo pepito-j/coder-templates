@@ -1,0 +1,49 @@
+FROM --platform=linux/amd64 ubuntu:24.04 
+
+ARG USER=ubuntu
+
+RUN apt update -y && apt install -y \
+    curl wget jq vim nano \
+    ca-certificates apt-transport-https locales \
+    software-properties-common \
+    gnupg gnupg2 \
+    openjdk-21-jdk python3-pip pipx \
+    sudo
+
+RUN wget -q https://download.docker.com/linux/ubuntu/gpg -O- | tee /etc/apt/keyrings/docker.asc && \
+    wget -q https://apt.releases.hashicorp.com/gpg -O- | gpg --dearmor | tee /etc/apt/keyrings/hashicorp-archive-keyring.gpg
+
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu noble stable" | tee /etc/apt/sources.list.d/docker.list && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com noble main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+    
+RUN apt update -y && apt install -y \
+    docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin \
+    terraform
+
+RUN dpkg-reconfigure -f noninteractive tzdata && \
+    sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    echo 'LANG="en_US.UTF-8"'>/etc/default/locale && \
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    update-locale LANG=en_US.UTF-8
+
+RUN apt clean && rm -rf /var/lib/apt/list/* /tmp/*
+
+# RUN adduser --disabled-password --disabled-login \
+#     --force-badname --uid 1000 \
+#     --shell /bin/bash $USER && usermod -aG sudo,root $USER
+
+RUN usermod -aG sudo,root $USER
+
+RUN echo "$USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/$USER && chmod 0440 /etc/sudoers.d/$USER
+
+USER $USER
+ENV HOME=/home/$USER
+WORKDIR $HOME
+
+RUN export \
+    PATH=$PATH:$HOME/.local/bin
+
+RUN pipx ensurepath && pipx install \
+    commitizen
+
+RUN curl -L https://coder.com/install.sh | sh
