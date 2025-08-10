@@ -22,6 +22,16 @@ variable "aws_secret_access_key_id" {
     sensitive = true
 }
 
+variable "coder_access_url" {
+    type = string
+    deafult = ""
+}
+
+variable "coder_wildcard_access_url" {
+    type = string
+    deafult = ""
+}
+
 provider "aws" {
     region = var.region
     access_key  = var.aws_access_key_id
@@ -31,10 +41,8 @@ provider "aws" {
 locals {
     envs = {
         CODER_VERSION = "2.25.1"
-        # CODER_ACCESS_URL = "http://thejupepe.xyz"
-        CODER_ACCESS_URL = "http://${aws_instance.this.public_dns}"
-        # CODER_WILDCARD_ACCESS_URL = "*.thejupepe.xyz"
-        CODER_WILDCARD_ACCESS_URL = "*.${aws_instance.this.public_dns}"
+        CODER_ACCESS_URL = var.coder_access_url != "" : var.coder_access_url ? "http://${aws_instance.this.public_dns}"
+        CODER_WILDCARD_ACCESS_URL = var.coder_wildcard_access_url != "" : var.coder_wildcard_access_url ? "*.${aws_instance.this.public_dns}"
         CODER_HTTP_ADDRESS = "127.0.0.1:3000"
         CODER_TLS_ADDRESS = "127.0.0.1:3443"
         CODER_TLS_ENABLE = false
