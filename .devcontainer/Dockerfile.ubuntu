@@ -8,6 +8,7 @@ RUN apt update -y && apt install -y \
     software-properties-common \
     gnupg gnupg2 \
     openjdk-21-jdk python3-pip pipx \
+    git gh \
     sudo
 
 RUN wget -q https://download.docker.com/linux/ubuntu/gpg -O- | tee /etc/apt/keyrings/docker.asc && \
